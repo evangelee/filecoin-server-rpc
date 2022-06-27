@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+
 	"github.com/filecoin-project/go-address"
 	"github.com/ipfs/go-cid"
 	"github.com/myxtype/filecoin-client/client"
@@ -14,17 +15,16 @@ import (
 	"github.com/myxtype/filecoin-client/pkg/setting"
 	"github.com/myxtype/filecoin-client/types"
 	"github.com/shopspring/decimal"
+
 	//"time"
 
 	"log"
 )
 
-
-
-
 func ConnectClient() *client.Client {
 
-	return client.NewClient(setting.SERVER_HOST, setting.TOKEN)
+	return client.New(setting.SERVER_HOST)
+	// return client.NewClient(setting.SERVER_HOST, setting.TOKEN)
 }
 
 //upgrade transations from chain
@@ -80,7 +80,7 @@ func UpgradeTransations1(height int64) (*types.BlockMessages1, error) {
 		}
 
 		//fmt.Println("********开始查找 BlsMessages********",len(bm.BlsMessages))
-		for index, item := range bm.BlsMessages{
+		for index, item := range bm.BlsMessages {
 
 			//fmt.Println("********输出所有的bm.BlsMessages-cid********",len(bm.BlsMessages),index,bm.Cids[index])
 			//log.Println("********输出所有的bm.BlsMessages-cid********",len(bm.BlsMessages),index,bm.Cids[index])
@@ -88,7 +88,7 @@ func UpgradeTransations1(height int64) (*types.BlockMessages1, error) {
 				log.Println("*****解析bm.BlsMessages出错*****" + err.Error())
 			} else {
 				if b {
-					log.Println("找到一笔bm.BlsMessages出错交易",bm.Cids[index],item.From.String(),item.To.String())
+					log.Println("找到一笔bm.BlsMessages出错交易", bm.Cids[index], item.From.String(), item.To.String())
 					item.Direct = direct //设置方向
 					Messages = append(Messages, item)
 					Cids = append(Cids, bm.Cids[index])
@@ -116,11 +116,7 @@ func UpgradeTransations1(height int64) (*types.BlockMessages1, error) {
 
 			}
 
-
 		}
-
-
-
 
 	}
 	return &types.BlockMessages1{BlsMessages: Messages, Cids: Cids, Height: ts.Height}, nil
@@ -146,9 +142,7 @@ func NewAccount() (string, error) {
 	return addr.String(), nil
 }
 
-
-
-func NewAccount1() (string,string, error) {
+func NewAccount1() (string, string, error) {
 	c := ConnectClient()
 
 	// t1r6egk7djfy7krbw7zdswbgdhep4hge5fecwmsoi
@@ -156,32 +150,30 @@ func NewAccount1() (string,string, error) {
 
 	addr1, err1 := c.WalletNew(context.Background(), crypto.SigTypeSecp256k1)
 	if err != nil {
-		return "","", nil
+		return "", "", nil
 	}
 
 	if err1 != nil {
-		return "","", nil
+		return "", "", nil
 	}
-	println("入金账号"+addr.String())
-	println("出金账号"+addr1.String())
+	println("入金账号" + addr.String())
+	println("出金账号" + addr1.String())
 	ki, err := c.WalletExport(context.Background(), addr)
 	if err != nil {
-		return "","", nil
+		return "", "", nil
 	}
 
 	ki1, err1 := c.WalletExport(context.Background(), addr)
 	if err1 != nil {
-		return "","", nil
+		return "", "", nil
 	}
 
 	// secp256k1 fd1d429f2e0744f5dbcc361796e1a6f5cf4b59ecca92c15c27f837401c12a3da
 	//t.Log(ki.Type, hex.EncodeToString(ki.PrivateKey))
 	println(ki.Type, hex.EncodeToString(ki.PrivateKey))
 	println(ki1.Type, hex.EncodeToString(ki1.PrivateKey))
-	return addr.String(),addr1.String(), nil
+	return addr.String(), addr1.String(), nil
 }
-
-
 
 //获取当前块高度
 func GetLastHeight() (int64, error) {
@@ -260,16 +252,13 @@ func SendFilCoin(toAddress string, amount float64) (string, error) {
 		Params:     nil,
 	}
 
-
 	maxFee := client.FromFil(decimal.NewFromFloat(0.01))
 	msg, err := c.GasEstimateMessageGas(context.Background(), msg, &types.MessageSendSpec{MaxFee: maxFee}, nil)
 	if err != nil {
 		return "", err
 	}
 
-
-
-	actor, err := c.StateGetActor(context.Background(), msg.From,  nil)
+	actor, err := c.StateGetActor(context.Background(), msg.From, nil)
 	if err != nil {
 		return "", err
 	}
@@ -290,7 +279,6 @@ func SendFilCoin(toAddress string, amount float64) (string, error) {
 	return id.String(), nil
 
 }
-
 
 func SendFromOutAccount(toAddress string, amount float64) (string, error) {
 
@@ -314,15 +302,13 @@ func SendFromOutAccount(toAddress string, amount float64) (string, error) {
 		Params:     nil,
 	}
 
-
 	maxFee := client.FromFil(decimal.NewFromFloat(0.01))
 	msg, err := c.GasEstimateMessageGas(context.Background(), msg, &types.MessageSendSpec{MaxFee: maxFee}, nil)
 	if err != nil {
 		return "", err
 	}
 
-
-	actor, err := c.StateGetActor(context.Background(), msg.From,  nil)
+	actor, err := c.StateGetActor(context.Background(), msg.From, nil)
 	if err != nil {
 		return "", err
 	}
@@ -363,17 +349,13 @@ func SendFilCoin1(fromAddress string, toAddress string, amount float64) (string,
 		Params:     nil,
 	}
 
-
-
 	maxFee := client.FromFil(decimal.NewFromFloat(0.01))
 	msg, err := c.GasEstimateMessageGas(context.Background(), msg, &types.MessageSendSpec{MaxFee: maxFee}, nil)
 	if err != nil {
 		return "", err
 	}
 
-
-
-	actor, err := c.StateGetActor(context.Background(),msg.From, nil)
+	actor, err := c.StateGetActor(context.Background(), msg.From, nil)
 	if err != nil {
 		return "", err
 	}
@@ -381,7 +363,7 @@ func SendFilCoin1(fromAddress string, toAddress string, amount float64) (string,
 	msg.Nonce = actor.Nonce
 	fmt.Println(msg)
 
-	sm, err := c.WalletSignMessage(context.Background(),msg.From, msg)
+	sm, err := c.WalletSignMessage(context.Background(), msg.From, msg)
 	if err != nil {
 		return "", err
 	}
@@ -454,7 +436,7 @@ func hasAddress(c *client.Client, from string, to string) (bool, string, error) 
 
 		return false, "", nil
 	} else {
-		fmt.Println(">>>>>>>>>>>>本钱包交易<<<<<<<<<<<<<",from_str,to_str)
+		fmt.Println(">>>>>>>>>>>>本钱包交易<<<<<<<<<<<<<", from_str, to_str)
 		//属于钱包 的地址 分3种情况
 		if from_b && to_b == false { //out 转出
 			return true, "out", nil
@@ -487,24 +469,25 @@ func GetTransConfirms(txid string) (int64, error) {
 /**获取一笔状态交易
   state:0 表示新交易
   state:1 表示加积分成功-后台使用
- */
+*/
 func GetOneTransation(state string) (*models.FilIntegral, error) {
 	db := manager.GetDbInstance()
 	var order models.FilIntegral
 	if db := db.Where("state = ?", state).First(&order); db.RowsAffected == 1 {
-		return &order,nil
+		return &order, nil
 	}
 	return nil, nil
 }
+
 /**
   加完积分后调用资金归集到总账号
- */
+*/
 
-func ChangeIntegralState(txid string,state int64)  error{
+func ChangeIntegralState(txid string, state int64) error {
 	db := manager.GetDbInstance()
-	if db:=db.Model(&models.FilIntegral{}).Where("txid = ?",txid ).Update("state", state);db.RowsAffected==1{
+	if db := db.Model(&models.FilIntegral{}).Where("txid = ?", txid).Update("state", state); db.RowsAffected == 1 {
 		return nil
 	}
 	return errors.New("更新状态失败")
-	
+
 }
