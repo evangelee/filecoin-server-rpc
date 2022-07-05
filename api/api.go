@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/ipfs/go-cid"
@@ -23,8 +24,7 @@ import (
 
 func ConnectClient() *client.Client {
 
-	return client.New(setting.SERVER_HOST)
-	// return client.NewClient(setting.SERVER_HOST, setting.TOKEN)
+	return client.NewClient(setting.SERVER_HOST, setting.TOKEN)
 }
 
 //upgrade transations from chain
@@ -46,12 +46,13 @@ func UpgradeTransations(account string, height int64) (*types.BlockMessages1, er
 		}
 		//fmt.Println("子块SecpkMessages长度", len(bm.SecpkMessages))
 		for subindex, item := range bm.SecpkMessages {
-			fmt.Println(item.Message)
-			if item.Message.To.String() == account { //找和自己有关的交易
+			// fmt.Println(item.Message)
+			fmt.Println(item.Message.To.String(), "==>", account)
+			if strings.EqualFold(item.Message.To.String(), account) { //找和自己有关的交易
 				fmt.Println("找到一笔自己的交易")
 				subcid := len(bm.BlsMessages) + subindex
 				cid := bm.Cids[subcid]
-				fmt.Println(subcid, cid, item.Message)
+				// fmt.Println(subcid, cid, item.Message)
 				Messages = append(Messages, item.Message)
 				Cids = append(Cids, cid)
 			}
@@ -147,12 +148,11 @@ func NewAccount1() (string, string, error) {
 
 	// t1r6egk7djfy7krbw7zdswbgdhep4hge5fecwmsoi
 	addr, err := c.WalletNew(context.Background(), crypto.SigTypeSecp256k1)
-
-	addr1, err1 := c.WalletNew(context.Background(), crypto.SigTypeSecp256k1)
 	if err != nil {
 		return "", "", nil
 	}
 
+	addr1, err1 := c.WalletNew(context.Background(), crypto.SigTypeSecp256k1)
 	if err1 != nil {
 		return "", "", nil
 	}

@@ -2,6 +2,11 @@ package controller
 
 import (
 	"fmt"
+	"log"
+	"math/big"
+	"strconv"
+	"time"
+
 	"github.com/jinzhu/gorm"
 	"github.com/myxtype/filecoin-client/api"
 	"github.com/myxtype/filecoin-client/client"
@@ -10,17 +15,13 @@ import (
 	"github.com/myxtype/filecoin-client/pkg/setting"
 	"github.com/myxtype/filecoin-client/types"
 	"github.com/robfig/cron"
-	"log"
-	"math/big"
-	"strconv"
-	"time"
 )
 
-func Fil_InitCron( db *gorm.DB)  error{
+func Fil_InitCron(db *gorm.DB) error {
 
 	//启动定时任务定时更新区块
-	 go InitCron(db)
-	 return nil
+	go InitCron(db)
+	return nil
 }
 
 func Fil_InitOrderCron(db *gorm.DB) error {
@@ -30,14 +31,13 @@ func Fil_InitOrderCron(db *gorm.DB) error {
 	return nil
 }
 
-
 func InitWallet(db *gorm.DB) string {
 	//如果没有账号创建一个账号
 	var wallet models.Wallet
 	db.Last(&wallet)
 	if wallet.Address == "" {
-		if inaccount,outaccount, err := api.NewAccount1(); err == nil {
-			db.Save(&models.Wallet{Address: inaccount,Outaddress:outaccount})
+		if inaccount, outaccount, err := api.NewAccount1(); err == nil {
+			db.Save(&models.Wallet{Address: inaccount, Outaddress: outaccount})
 			log.Println("新创建入金账号:" + inaccount)
 			log.Println("新创建出金账号:" + outaccount)
 			return inaccount
@@ -51,10 +51,6 @@ func InitWallet(db *gorm.DB) string {
 
 	return ""
 }
-
-
-
-
 
 func fil_insertDb1(transactions *types.BlockMessages1) error {
 	//查询这笔交易的确认数
@@ -103,8 +99,6 @@ func fil_insertDb1(transactions *types.BlockMessages1) error {
 
 }
 
-
-
 func fil_insertDb2(transactions *types.BlockMessages1) error {
 	//查询这笔交易的确认数
 	currentHeight, err := api.GetLastHeight()
@@ -143,7 +137,7 @@ func fil_insertDb2(transactions *types.BlockMessages1) error {
 	//遍历集合插入到数据库------------------------------------------------
 	for _, sortitem := range transDatas {
 		sortitem.AddTransation(db)
-		sortitem.RelatedFilIntegral(db)//关联积分表-提供让其他人操纵这个表 其他人不能直接操作sys_filtransation表
+		sortitem.RelatedFilIntegral(db) //关联积分表-提供让其他人操纵这个表 其他人不能直接操作sys_filtransation表
 		time.Sleep(100 * time.Millisecond)
 	}
 
@@ -174,13 +168,11 @@ func fil_relateCmcRecord(db *gorm.DB, trans *models.CmcTransation) {
 
 }
 
-
-
 func InitCron(db *gorm.DB) {
 	//初始化直接同步最新块
 	if err := AsynChain(db); err != nil {
 		log.Println(err)
-	}else{//同步完成再启动定时任务
+	} else { //同步完成再启动定时任务
 		c := cron.New()
 		c.AddFunc(setting.CRONRULE, func() {
 			if err := AsynChain(db); err != nil {
@@ -190,19 +182,10 @@ func InitCron(db *gorm.DB) {
 		c.Run()
 	}
 
-
-
-
 }
 
-
-
-
-
-
-
 //初始化转账任务+查询确认数任务
-func InitTran2Cron(db *gorm.DB)  {
+func InitTran2Cron(db *gorm.DB) {
 	c := cron.New()
 	c.AddFunc(setting.CRONRULE_TRANS, func() {
 		if err := QueryOneTransRecored(db); err != nil {
@@ -212,8 +195,7 @@ func InitTran2Cron(db *gorm.DB)  {
 	c.Run()
 }
 
-
-func QueryConfirms(db *gorm.DB){
+func QueryConfirms(db *gorm.DB) {
 
 	c := cron.New()
 	c.AddFunc(setting.CRONRULE_CONFIRM, func() {
@@ -228,20 +210,20 @@ func QueryConfirms(db *gorm.DB){
 func QueryOneTransRecored(db *gorm.DB) error {
 	//过去最新一条符合条件的订单
 	var order models.Order
-	if action:=db.Last(&order,"state = ? AND txid is null",1);action.RowsAffected==1{//找到一条待转账记录
-	   fmt.Printf("查询出一条待转账订单: %s %s\n",order.Orderid,order.Bindaddress)
-	   //开始转账
-	   cid,err:=api.SendFilCoin(order.Bindaddress,order.Amount)
-	   if err!=nil{//转账异常
-	    return err
-	   }
+	if action := db.Last(&order, "state = ? AND txid is null", 1); action.RowsAffected == 1 { //找到一条待转账记录
+		fmt.Printf("查询出一条待转账订单: %s %s\n", order.Orderid, order.Bindaddress)
+		//开始转账
+		cid, err := api.SendFilCoin(order.Bindaddress, order.Amount)
+		if err != nil { //转账异常
+			return err
+		}
 
-	   if cid!=""{
-		   order.Txid=cid
-		   order.State=2
-		   db.Save(&order)
+		if cid != "" {
+			order.Txid = cid
+			order.State = 2
+			db.Save(&order)
 
-	   }
+		}
 
 	}
 
@@ -250,21 +232,20 @@ func QueryOneTransRecored(db *gorm.DB) error {
 }
 
 //查询一个订单的确认数
-func QueryOrderConfirmsFromChain(db *gorm.DB)  error{
+func QueryOrderConfirmsFromChain(db *gorm.DB) error {
 	var order models.Order
-	if action:=db.Last(&order,"state=?",2);action.RowsAffected==1{
-		code,err:=api.GetCidState(order.Txid)
-		if err!=nil{ //查询出现异常
+	if action := db.Last(&order, "state=?", 2); action.RowsAffected == 1 {
+		code, err := api.GetCidState(order.Txid)
+		if err != nil { //查询出现异常
 			return err
 		}
-		if code==0{//ok
-			order.State=3
+		if code == 0 { //ok
+			order.State = 3
 			db.Save(&order)
 		}
 	}
 	return nil
 }
-
 
 func AsynChain(db *gorm.DB) error {
 	//判断current高度
@@ -299,7 +280,7 @@ func AsynChain(db *gorm.DB) error {
 
 func InitAsyn(db *gorm.DB, account string, height int64) error {
 	//trans, _err := api.UpgradeTransations(account, height)
-	trans, _err := api.UpgradeTransations1( height)
+	trans, _err := api.UpgradeTransations1(height)
 
 	if _err != nil {
 		log.Println("------InitAsyn error------->", _err.Error())
@@ -318,8 +299,8 @@ func InitAsyn(db *gorm.DB, account string, height int64) error {
 //如果报错返回报错的块的高度
 func UpdateAsynOneChain(account string, height int64) (int64, error) {
 	//获取这个高度上饿的所有cid消息
-	//trans, _err := api.UpgradeTransations(account, height)
-	trans, _err := api.UpgradeTransations1( height)
+	trans, _err := api.UpgradeTransations(account, height)
+	// trans, _err := api.UpgradeTransations1(height)
 	if _err != nil { //同步这个块报错
 		return height, _err //直接返回和这个高度和报错信息
 	} else { //同步该块正常
@@ -338,19 +319,18 @@ func UpdateAsynLastChain(db *gorm.DB, wallet *models.Wallet) error {
 
 	//数据库获取当前
 	currentAsynedHeight := wallet.Current
-	tempheight:=wallet.Current
+	tempheight := wallet.Current
 	lastChainHeight, err := api.GetLastHeight()
 	if err != nil {
 		return err
 	}
 
-
-	fmt.Println("********当前高度-链上最新高度********",currentAsynedHeight,lastChainHeight)
+	fmt.Println("********当前高度-链上最新高度********", currentAsynedHeight, lastChainHeight)
 
 	for i := currentAsynedHeight; i <= lastChainHeight; i++ {
-		fmt.Println("********开始索引块高度********",i)
+		fmt.Println("********开始索引块高度********", i)
 		chainHeight, err := UpdateAsynOneChain(wallet.Address, i)
-		tempheight= chainHeight
+		tempheight = chainHeight
 		if err != nil { //报错后返回报错的块的高度
 			break
 		}
@@ -358,7 +338,7 @@ func UpdateAsynLastChain(db *gorm.DB, wallet *models.Wallet) error {
 
 	//保存这次任务执行后最终同步到第几个块或者说在第几个块同步报错
 	wallet.Current = tempheight
-	fmt.Println("********同步完成保存当前高度********",currentAsynedHeight,tempheight)
+	fmt.Println("********同步完成保存当前高度********", currentAsynedHeight, tempheight)
 	db.Save(&wallet)
 	return nil
 

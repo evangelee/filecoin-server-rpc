@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+
 	"github.com/filecoin-project/go-address"
 	"github.com/myxtype/filecoin-client/crypto"
 	"github.com/myxtype/filecoin-client/types"
@@ -78,11 +79,7 @@ func (c *Client) WalletVerify(ctx context.Context, k string, msg []byte, sig *cr
 	return ok, c.Request(ctx, c.FilecoinMethod("WalletVerify"), &ok, k, msg, sig)
 }
 
-
 func (c *Client) WalletValidateAddress(ctx context.Context, account string) (*address.Address, error) {
 	var address *address.Address
-	return address, c.Request(ctx, c.FilecoinMethod("WalletValidateAddress"),&address,account)
+	return address, c.Request(ctx, c.FilecoinMethod("WalletValidateAddress"), &address, account)
 }
-
-
-
