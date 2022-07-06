@@ -299,8 +299,8 @@ func InitAsyn(db *gorm.DB, account string, height int64) error {
 //如果报错返回报错的块的高度
 func UpdateAsynOneChain(account string, height int64) (int64, error) {
 	//获取这个高度上饿的所有cid消息
-	trans, _err := api.UpgradeTransations(account, height)
-	// trans, _err := api.UpgradeTransations1(height)
+	// trans, _err := api.UpgradeTransations(account, height)
+	trans, _err := api.UpgradeTransations1(height)
 	if _err != nil { //同步这个块报错
 		return height, _err //直接返回和这个高度和报错信息
 	} else { //同步该块正常

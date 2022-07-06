@@ -3,6 +3,7 @@ package setting
 import (
 	"log"
 	"time"
+
 	"github.com/go-ini/ini"
 )
 
@@ -11,38 +12,37 @@ var (
 
 	RunMode string
 
-	HTTPPort int
-	ReadTimeout time.Duration
-	WriteTimeout time.Duration
+	HTTPPort          int
+	ReadTimeout       time.Duration
+	WriteTimeout      time.Duration
 	AUTO_CREATE_TABLE bool
 
-	PageSize int
+	PageSize  int
 	JwtSecret string
 )
 
 //rpc
-var(
+var (
 	SERVER_HOST string
 	SERVER_PORT int
-	ISMINER bool
-	TOKEN string
+	ISMINER     bool
+	TOKEN       string
 	USER        string
 	PASSWD      string
 	USESSL      bool
 )
+
 //cron
-var(
-	CRONRULE string
-	CRONRULE1 string
-	CRONRULE_TRANS string
+var (
+	CRONRULE         string
+	CRONRULE1        string
+	CRONRULE_TRANS   string
 	CRONRULE_CONFIRM string
 )
 
-
-
 func init() {
 	var err error
-	Cfg, err = ini.Load("conf/app.ini")
+	Cfg, err = ini.Load("../conf/app.ini")
 	if err != nil {
 		log.Fatalf("Fail to parse 'conf/app.ini': %v", err)
 	}
@@ -66,11 +66,11 @@ func LoadServer() {
 
 	HTTPPort = sec.Key("HTTP_PORT").MustInt(8000)
 	ReadTimeout = time.Duration(sec.Key("READ_TIMEOUT").MustInt(60)) * time.Second
-	WriteTimeout =  time.Duration(sec.Key("WRITE_TIMEOUT").MustInt(60)) * time.Second
+	WriteTimeout = time.Duration(sec.Key("WRITE_TIMEOUT").MustInt(60)) * time.Second
 
 }
 
-func loadRpc(){
+func loadRpc() {
 	sec, err := Cfg.GetSection("rpc")
 	if err != nil {
 		log.Fatalf("Fail to get section 'app': %v", err)
@@ -84,7 +84,7 @@ func loadRpc(){
 	ISMINER = sec.Key("ISMINER").MustBool(true)
 }
 
-func loadCron()  {
+func loadCron() {
 	sec, err := Cfg.GetSection("cron")
 	if err != nil {
 		log.Fatalf("Fail to get section 'app': %v", err)
@@ -93,7 +93,6 @@ func loadCron()  {
 	CRONRULE_TRANS = sec.Key("CRONRULE_TRANS").MustString("0 0/3 * * * ?")
 	CRONRULE_CONFIRM = sec.Key("CRONRULE_CONFIRM").MustString("0 0/2 * * * ?")
 }
-
 
 func LoadApp() {
 	sec, err := Cfg.GetSection("app")

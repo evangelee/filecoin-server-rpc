@@ -83,8 +83,8 @@ func UpgradeTransations1(height int64) (*types.BlockMessages1, error) {
 		//fmt.Println("********开始查找 BlsMessages********",len(bm.BlsMessages))
 		for index, item := range bm.BlsMessages {
 
-			//fmt.Println("********输出所有的bm.BlsMessages-cid********",len(bm.BlsMessages),index,bm.Cids[index])
-			//log.Println("********输出所有的bm.BlsMessages-cid********",len(bm.BlsMessages),index,bm.Cids[index])
+			// fmt.Println("********输出所有的bm.BlsMessages-cid********", len(bm.BlsMessages), index, bm.Cids[index])
+			// log.Println("********输出所有的bm.BlsMessages-cid********", len(bm.BlsMessages), index, bm.Cids[index])
 			if b, direct, err := hasAddress(c, item.From.String(), item.To.String()); err != nil { //找属于本钱包节点的冲币地址
 				log.Println("*****解析bm.BlsMessages出错*****" + err.Error())
 			} else {
