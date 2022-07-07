@@ -71,6 +71,9 @@ http://127.0.0.1:8085/auth?username=加密(xxx)&password=加密(xxxxxx)
 },
 "msg": "ok"
 }
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiIxMjM0NTY3IiwiZXhwIjoxNjU3MTk1MTExLCJpc3MiOiJnaW4tYmxvZyJ9.kNHnDe59MhPd5VZydWZvZescqyCajilwTgHKfjbf754
+
 安全期间增加了token令牌请求 和rsa加密方式 调用端只需要用公钥 加密 参数即可
  
  下面这些都是要带上上面这种token放到头请求

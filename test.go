@@ -6,10 +6,14 @@ import (
 	"github.com/myxtype/filecoin-client/util"
 )
 
-func main1() {
-	testStr := "t1otzxmzqqrlnpfzczhb4tx6c4glwzlozqx5lalja"
+func main() {
+
+	util.GenerateKey()
+
+	testStr := "f1g6ckkx7pbj2g6wnmns55ubz5jlexvq6eksw7apa"
 	enstr := util.Encrypt(testStr)
 	fmt.Println(enstr)
+	fmt.Println("==========")
 	destr := util.Decrypt(enstr)
 	fmt.Println(destr)
 	fmt.Println("==========")
