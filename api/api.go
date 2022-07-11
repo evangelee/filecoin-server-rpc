@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -123,7 +124,6 @@ func UpgradeTransations1(height int64) (*types.BlockMessages1, error) {
 	return &types.BlockMessages1{BlsMessages: Messages, Cids: Cids, Height: ts.Height}, nil
 
 }
-
 func NewAccount() (string, error) {
 	c := ConnectClient()
 
@@ -141,6 +141,33 @@ func NewAccount() (string, error) {
 	//t.Log(ki.Type, hex.EncodeToString(ki.PrivateKey))
 	println(ki.Type, hex.EncodeToString(ki.PrivateKey))
 	return addr.String(), nil
+}
+
+func NewAccount2() (string, error) {
+	c := ConnectClient()
+	db:=manager.GetDbInstance()
+	// t1r6egk7djfy7krbw7zdswbgdhep4hge5fecwmsoi
+	addr, err := c.WalletNew(context.Background(), crypto.SigTypeSecp256k1)
+	if err != nil {
+		return "", nil, err
+	}
+	println(addr.String())
+	ki, err := c.WalletExport(context.Background(), addr)
+	if err != nil {
+		return "", nil, err
+	}
+
+	// secp256k1 fd1d429f2e0744f5dbcc361796e1a6f5cf4b59ecca92c15c27f837401c12a3da
+	//t.Log(ki.Type, hex.EncodeToString(ki.PrivateKey))
+	println(ki.Type, hex.EncodeToString(ki.PrivateKey))
+
+		kb, err := json.Marshal(ki)
+	if err != nil {
+		return "", err
+	}
+
+
+	return addr.String()，ki, nil
 }
 
 func NewAccount1() (string, string, error) {

@@ -12,7 +12,7 @@ import (
 	routers "github.com/myxtype/filecoin-client/routers/api"
 )
 
-func main1() {
+func main() {
 
 	//使用主网参数去解析链上交易
 	address.CurrentNetwork = address.Mainnet

@@ -2,22 +2,22 @@ package manager
 
 import (
 	"fmt"
+	"log"
+	"reflect"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/myxtype/filecoin-client/models"
 	"github.com/myxtype/filecoin-client/pkg/setting"
-	"log"
-	"reflect"
 )
 
 var (
-	dbinstance  *gorm.DB
+	dbinstance *gorm.DB
 )
-
 
 func GetDbInstance() (instance *gorm.DB) {
 	if dbinstance == nil {
-		db, err :=initDb()
+		db, err := initDb()
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -28,12 +28,10 @@ func GetDbInstance() (instance *gorm.DB) {
 	return dbinstance
 }
 
-
-
-func initDb() (*gorm.DB,error) {
+func initDb() (*gorm.DB, error) {
 	sec, _err := setting.Cfg.GetSection("database")
 	if _err != nil {
-		return nil,_err
+		return nil, _err
 	}
 	DBTYPE := sec.Key("TYPE").String()
 	DBNAME := sec.Key("NAME").String()
@@ -41,15 +39,15 @@ func initDb() (*gorm.DB,error) {
 	PASSWORD := sec.Key("PASSWORD").String()
 	HOST := sec.Key("HOST").String()
 	TABLEPREFIX := sec.Key("TABLE_PREFIX").String()
-	AUTO_CREATE_TABLE:=sec.Key("AUTO_CREATE_TABLE").MustBool(false)
+	AUTO_CREATE_TABLE := sec.Key("AUTO_CREATE_TABLE").MustBool(false)
 
-	gdb, err:= gorm.Open(DBTYPE, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
+	gdb, err := gorm.Open(DBTYPE, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		USER,
 		PASSWORD,
 		HOST,
 		DBNAME))
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	// 启用Logger，显示详细日志
@@ -64,21 +62,22 @@ func initDb() (*gorm.DB,error) {
 
 	if AUTO_CREATE_TABLE {
 		var tables = []interface{}{
-			//&models.CmcTransation{},
 			&models.Wallet{},
-			//&models.CmcRecord{},
 			&models.FilTransation{},
 			&models.Auth{},
 			&models.FilIntegral{},
-
+			&models.FilWallet{},
+			&models.FilRecharge{},
+			&models.FilCollection{},
+			&models.FilWithdraw{},
 		}
 		for _, table := range tables {
-			log.Printf("Automigrate table :%s ",reflect.TypeOf(table))
+			log.Printf("Automigrate table :%s ", reflect.TypeOf(table))
 			if err = gdb.AutoMigrate(table).Error; err != nil {
-				return nil,err
+				return nil, err
 			}
 		}
 	}
 
-	return gdb,nil
+	return gdb, nil
 }

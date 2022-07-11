@@ -92,10 +92,10 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiI
  判断地址是不是钱包地址：ip:port/api/v1/isnodeaddres/:address
 
  根据状态检索一笔交易  Ip:port/api/v1/getOneTranstion/:state  
- 修改一笔交易额状态  Ip:port/api/v1/changeIntegralState/:txid/:state  
+ 修改一笔交易额状态  Ip:port/api/v1/changeIntegralState/:txid/:state
 （ 0:代表刚同步到的新交易，1:代表你那边已经处理完成加积分）
 
- 提币：/api/v1/pay/sendfromoutaccount/:to/:amount 
+ 提币：/api/v1/pay/sendfromoutaccount/:to/:amount
 （统一从出金账户提币,需要平台冲币到这个账户足够的钱  出金账户,入金账户数据库初始化时候自动生成的，这里只需要填to账户和金额即可）
 另外转账失败等ui显示问题 请自行处理error封装   这边服务全部是原生链上操作不做error 封装处理 不然链上出错，难调试
 

@@ -3,6 +3,10 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
 	_ "github.com/ipfs/go-cid"
@@ -10,14 +14,11 @@ import (
 	"github.com/myxtype/filecoin-client/pkg/e"
 	"github.com/myxtype/filecoin-client/util"
 	"github.com/unknwon/com"
-	"log"
-	"net/http"
-	"strconv"
 )
 
 func GetFilTransaction(c *gin.Context) {
 	//log.Panicln("------GetRawTransaction---->")
-	cid:= util.Decrypt(c.Param("cid"))
+	cid := util.Decrypt(c.Param("cid"))
 	valid := validation.Validation{}
 
 	valid.Length(cid, 62, "cid").Message("cid必须是62位")
@@ -28,8 +29,8 @@ func GetFilTransaction(c *gin.Context) {
 			code = e.ERROR
 		} else {
 			code = e.SUCCESS
-			result,_:=json.Marshal(msg)
-			data["result"]=string(result)
+			result, _ := json.Marshal(msg)
+			data["result"] = string(result)
 		}
 
 	} else { //参数校验fail
@@ -54,14 +55,14 @@ func GetFilWalletBalance(c *gin.Context) {
 	code := e.INVALID_PARAMS
 	data := make(map[string]interface{})
 	//if !valid.HasErrors() { //参数校验ok
-		if balance, err := api.GetFileWalletBalance(account); err != nil {
-			code = e.ERROR
-			data["result"] = nil
-			fmt.Println(err.Error())
-		} else {
-			code = e.SUCCESS
-			data["result"] = balance
-		}
+	if balance, err := api.GetFileWalletBalance(account); err != nil {
+		code = e.ERROR
+		data["result"] = nil
+		fmt.Println(err.Error())
+	} else {
+		code = e.SUCCESS
+		data["result"] = balance
+	}
 
 	//}
 	c.JSON(http.StatusOK, gin.H{
@@ -73,8 +74,8 @@ func GetFilWalletBalance(c *gin.Context) {
 }
 
 func SendFilCoin(c *gin.Context) {
-	address:= util.Decrypt(c.Param("address"))
-	amountStr :=util.Decrypt(c.Param("amount"))
+	address := util.Decrypt(c.Param("address"))
+	amountStr := util.Decrypt(c.Param("amount"))
 	amount := com.StrTo(amountStr).MustFloat64()
 	code := e.ERROR
 	data := make(map[string]interface{})
@@ -96,13 +97,9 @@ func SendFilCoin(c *gin.Context) {
 	})
 }
 
-
-
-
-
 func SendFromOutAccount(c *gin.Context) {
-	to:= util.Decrypt(c.Param("to"))
-	amountStr :=util.Decrypt(c.Param("amount"))
+	to := util.Decrypt(c.Param("to"))
+	amountStr := util.Decrypt(c.Param("amount"))
 	amount := com.StrTo(amountStr).MustFloat64()
 	code := e.ERROR
 	data := make(map[string]interface{})
@@ -125,15 +122,14 @@ func SendFromOutAccount(c *gin.Context) {
 	})
 }
 
-
 func SendFilCoin1(c *gin.Context) {
 
-	addressfrom:= util.Decrypt(c.Param("from"))
-	addressTo:=util.Decrypt(c.Param("to"))
-	amountDeccrip:= util.Decrypt(c.Param("amount"))
-	fmt.Println("******from******"+addressfrom)
-	fmt.Println("******to******"+addressTo)
-	fmt.Println("******amount******"+amountDeccrip)
+	addressfrom := util.Decrypt(c.Param("from"))
+	addressTo := util.Decrypt(c.Param("to"))
+	amountDeccrip := util.Decrypt(c.Param("amount"))
+	fmt.Println("******from******" + addressfrom)
+	fmt.Println("******to******" + addressTo)
+	fmt.Println("******amount******" + amountDeccrip)
 
 	amount := com.StrTo(amountDeccrip).MustFloat64()
 	code := e.ERROR
@@ -213,7 +209,7 @@ func Fil_wallethas(c *gin.Context) {
 func Fil_NewAccount(c *gin.Context) {
 	code := e.ERROR
 	data := make(map[string]interface{})
-	account,err := api.NewAccount()
+	account, err := api.NewAccount2()
 	if err != nil {
 		data["result"] = err.Error()
 	} else {
@@ -249,7 +245,7 @@ func Fil_GetlastHeight(c *gin.Context) {
 func Fil_TransConfirms(c *gin.Context) {
 
 	code := e.ERROR
-	txid:= util.Decrypt(c.Param("txid"))
+	txid := util.Decrypt(c.Param("txid"))
 	data := make(map[string]interface{})
 	number, err := api.GetTransConfirms(txid)
 	if err != nil {
@@ -266,13 +262,11 @@ func Fil_TransConfirms(c *gin.Context) {
 	})
 }
 
-
-
 func Fil_ChangeIntegralState(c *gin.Context) {
 	code := e.ERROR
 	data := make(map[string]interface{})
-	state:= util.Decrypt(c.Param("state"))
-	txid:= util.Decrypt(c.Param("txid"))
+	state := util.Decrypt(c.Param("state"))
+	txid := util.Decrypt(c.Param("txid"))
 	state64, err := strconv.ParseInt(state, 10, 64)
 	err = api.ChangeIntegralState(txid, state64)
 	if err != nil {
@@ -289,12 +283,10 @@ func Fil_ChangeIntegralState(c *gin.Context) {
 	})
 }
 
-
-
 func Fil_GetOneTransation(c *gin.Context) {
 	code := e.ERROR
 	data := make(map[string]interface{})
-	state:= util.Decrypt(c.Param("state"))
+	state := util.Decrypt(c.Param("state"))
 	trans, err := api.GetOneTransation(state)
 	if err != nil {
 		data["result"] = err.Error()
@@ -309,5 +301,3 @@ func Fil_GetOneTransation(c *gin.Context) {
 		"data": data,
 	})
 }
-
-
