@@ -9,5 +9,7 @@ type FilRecharge struct {
 	NowBalance  float64 `json:"now_balance"`
 	LastBalance float64 `json:"last_balance"`
 	State       int     `json:"state"`
+	Direct      string  `json:"direct"`
 	CreateTime  int64   `json:"create_time"`
+	UpdateTime  int64   `json:"update_time"`
 }

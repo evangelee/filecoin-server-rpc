@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type FilTransation struct {
@@ -24,11 +25,8 @@ type FilTransation struct {
 	Generated     bool    `json:"generated"`
 	Address       string  `json:"address"` //from
 	To            string  `json:"to"`      //to
-	Direct         string  `json:"direct"`
-
+	Direct        string  `json:"direct"`
 }
-
-
 
 func (t *FilTransation) AddTransation(db *gorm.DB) error {
 	err := db.Where("txid = ?", t.Txid).FirstOrCreate(&t)
@@ -37,29 +35,61 @@ func (t *FilTransation) AddTransation(db *gorm.DB) error {
 	}
 	return nil
 }
+func (t *FilTransation) AddRecharge(db *gorm.DB) error {
+	if err := db.Where("txid = ?", t.Txid).FirstOrCreate(&FilRecharge{
+		Txid:        t.Txid,
+		Amount:      t.Amount,
+		FromAddress: t.Address,
+		ToAddress:   t.To,
+		State:       0,
+		Direct:      t.Direct,
+		CreateTime:  time.Now().Unix(),
+		UpdateTime:  time.Now().Unix(),
+	}).Error; err != nil {
+		return err
+	}
 
+	// db.Transaction(func(tx *gorm.DB) error {
+	// 	if err := tx.Where("txid = ?", t.Txid).FirstOrCreate(&FilRecharge{
+	// 		Txid:        t.Txid,
+	// 		Amount:      t.Amount,
+	// 		FromAddress: t.Address,
+	// 		ToAddress:   t.To,
+	// 		State:       0,
+	// 		Direct:      t.Direct,
+	// 		CreateTime:  time.Now().Unix(),
+	// 	}).Error; err != nil {
+	// 		return err
+	// 	}
 
-func (t *FilTransation)RelatedFilIntegral(db *gorm.DB) error {
+	// 	if err := tx.Model(&FilWallet{}).Where("address = ?", t.To).UpdateColumns(map[string]interface{}{"balance": gorm.Expr("balance+?", t.Amount), "update_time": time.Now().Unix()}).Error; err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// })
+
+	return nil
+}
+
+func (t *FilTransation) RelatedFilIntegral(db *gorm.DB) error {
 	db.Where("txid = ?", t.Txid).FirstOrCreate(&FilIntegral{
-		Txid:          t.Txid,
-		Amount:        t.Amount,
-		From:          t.Address,
-		To:            t.To,
-		State:         0,
-		Direct:        t.Direct,
-
+		Txid:   t.Txid,
+		Amount: t.Amount,
+		From:   t.Address,
+		To:     t.To,
+		State:  0,
+		Direct: t.Direct,
 	})
 	return nil
 }
 
-func (t *FilTransation) FindOneTransation(db *gorm.DB) (string,error) {
+func (t *FilTransation) FindOneTransation(db *gorm.DB) (string, error) {
 	err := db.Where("txid = ?", t.Txid).Find(&t)
 	if err != nil {
-		return "",err.Error
+		return "", err.Error
 	}
-	return t.Txid,nil
+	return t.Txid, nil
 }
-
 
 func (t *FilTransation) GetLastTransation(db *gorm.DB) (string, error) {
 
@@ -68,7 +98,6 @@ func (t *FilTransation) GetLastTransation(db *gorm.DB) (string, error) {
 	return "", nil
 
 }
-
 
 func (t *FilTransation) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("CreatedOn", time.Now().Unix())

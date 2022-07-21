@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/ipfs/go-cid"
@@ -145,29 +146,35 @@ func NewAccount() (string, error) {
 
 func NewAccount2() (string, error) {
 	c := ConnectClient()
-	db:=manager.GetDbInstance()
 	// t1r6egk7djfy7krbw7zdswbgdhep4hge5fecwmsoi
 	addr, err := c.WalletNew(context.Background(), crypto.SigTypeSecp256k1)
 	if err != nil {
-		return "", nil, err
+		return "", err
 	}
 	println(addr.String())
 	ki, err := c.WalletExport(context.Background(), addr)
 	if err != nil {
-		return "", nil, err
+		return "", err
 	}
 
 	// secp256k1 fd1d429f2e0744f5dbcc361796e1a6f5cf4b59ecca92c15c27f837401c12a3da
 	//t.Log(ki.Type, hex.EncodeToString(ki.PrivateKey))
 	println(ki.Type, hex.EncodeToString(ki.PrivateKey))
 
-		kb, err := json.Marshal(ki)
+	kb, err := json.Marshal(ki)
 	if err != nil {
 		return "", err
 	}
+	addrress := addr.String()
+	privateKey := hex.EncodeToString(kb)
 
+	db := manager.GetDbInstance()
+	curTime := time.Now().Unix()
+	if err := db.Create(&models.FilWallet{Address: addrress, PrivateKey: privateKey, Balance: 0, CreateTime: curTime, UpdateTime: curTime}).Error; err != nil {
+		return "", err
+	}
 
-	return addr.String()，ki, nil
+	return addrress, nil
 }
 
 func NewAccount1() (string, string, error) {

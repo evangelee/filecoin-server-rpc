@@ -137,7 +137,8 @@ func fil_insertDb2(transactions *types.BlockMessages1) error {
 	//遍历集合插入到数据库------------------------------------------------
 	for _, sortitem := range transDatas {
 		sortitem.AddTransation(db)
-		sortitem.RelatedFilIntegral(db) //关联积分表-提供让其他人操纵这个表 其他人不能直接操作sys_filtransation表
+		// sortitem.RelatedFilIntegral(db) //关联积分表-提供让其他人操纵这个表 其他人不能直接操作sys_filtransation表
+		sortitem.AddRecharge(db)
 		time.Sleep(100 * time.Millisecond)
 	}
 

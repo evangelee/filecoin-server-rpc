@@ -107,3 +107,8 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiI
 ~~~~
 
 
+创建钱包地址私钥放入数据库加密保存
+金额大于0.1可手动归集或自动归集
+用户提币订单，审核提币
+用户存币推送业务
+
