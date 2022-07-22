@@ -27,7 +27,7 @@ func Fil_InitCron(db *gorm.DB) error {
 func Fil_InitOrderCron(db *gorm.DB) error {
 
 	go InitTran2Cron(db)
-	go QueryConfirms(db)
+	// go QueryConfirms(db)
 	return nil
 }
 
@@ -189,7 +189,7 @@ func InitCron(db *gorm.DB) {
 func InitTran2Cron(db *gorm.DB) {
 	c := cron.New()
 	c.AddFunc(setting.CRONRULE_TRANS, func() {
-		if err := QueryOneTransRecored(db); err != nil {
+		if err := QueryRechargeRecored(db); err != nil {
 			log.Println(err)
 		}
 	})
@@ -206,6 +206,20 @@ func QueryConfirms(db *gorm.DB) {
 	})
 	c.Run()
 
+}
+
+func QueryRechargeRecored(db *gorm.DB) error {
+	var filRecharge = &[]models.FilRecharge{}
+
+	if err := db.Where("state=?", 0).Find(&filRecharge).Error; err != nil {
+		return err
+	}
+	for _, item := range *filRecharge {
+		if err := item.UpdateRecharge(db); err != nil {
+			fmt.Println(err.Error())
+		}
+	}
+	return nil
 }
 
 func QueryOneTransRecored(db *gorm.DB) error {

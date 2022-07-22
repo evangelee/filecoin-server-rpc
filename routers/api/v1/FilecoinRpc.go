@@ -6,11 +6,14 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
 	_ "github.com/ipfs/go-cid"
 	"github.com/myxtype/filecoin-client/api"
+	"github.com/myxtype/filecoin-client/manager"
+	"github.com/myxtype/filecoin-client/models"
 	"github.com/myxtype/filecoin-client/pkg/e"
 	"github.com/myxtype/filecoin-client/util"
 	"github.com/unknwon/com"
@@ -96,11 +99,47 @@ func SendFilCoin(c *gin.Context) {
 		"data": data,
 	})
 }
+func Withdraw(c *gin.Context) {
+	to := util.Decrypt(c.Param("to"))
+	amountStr := util.Decrypt(c.Param("amount"))
+	amount := com.StrTo(amountStr).MustFloat64()
+	orderNo := util.Decrypt(c.Param("orderno"))
 
+	code := e.ERROR
+	data := make(map[string]interface{})
+	// var filWithdraw *models.FilWithdraw
+	t := &models.FilWithdraw{
+		BusinessNo: orderNo,
+		ToAddress:  to,
+		Amount:     amount,
+		State:      0,
+		CreateTime: time.Now().Unix(),
+		UpdateTime: time.Now().Unix(),
+	}
+	db := manager.GetDbInstance()
+	err := t.AddWithdraw(db)
+	if err != nil {
+		code = e.ERROR
+		log.Println("------SendFromOutAccount err------>", err.Error())
+		data["result"] = nil
+		data["msg"] = err.Error()
+	} else {
+		log.Printf("cid result: %s", cid)
+		code = e.SUCCESS
+		data["result"] = ""
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": code,
+		"msg":  e.GetMsg(code),
+		"data": data,
+	})
+}
 func SendFromOutAccount(c *gin.Context) {
 	to := util.Decrypt(c.Param("to"))
 	amountStr := util.Decrypt(c.Param("amount"))
 	amount := com.StrTo(amountStr).MustFloat64()
+
 	code := e.ERROR
 	data := make(map[string]interface{})
 	cid, err := api.SendFromOutAccount(to, amount)

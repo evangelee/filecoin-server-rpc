@@ -25,7 +25,7 @@ func main() {
 
 	}
 	//初始化转账和查询订单确认数任务
-	//controller.Fil_InitOrderCron(manager.GetDbInstance())
+	controller.Fil_InitOrderCron(manager.GetDbInstance())
 	//log.Println("初始化转账和查询订单确认数任务成功\n")
 
 	//初始化api服务
