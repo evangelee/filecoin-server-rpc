@@ -124,7 +124,7 @@ func Withdraw(c *gin.Context) {
 		data["result"] = nil
 		data["msg"] = err.Error()
 	} else {
-		log.Printf("cid result: %s", cid)
+		log.Printf("cid result: %s", "cid")
 		code = e.SUCCESS
 		data["result"] = ""
 	}
